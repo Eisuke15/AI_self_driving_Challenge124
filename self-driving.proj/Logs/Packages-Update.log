@@ -1,0 +1,11 @@
+
+=== Tue Dec  1 17:36:05 2020
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.ide.rider from version 1.1.4 to 1.2.1
+  com.unity.ide.visualstudio from version 1.0.11 to 2.0.3
+  com.unity.render-pipelines.universal from version 7.3.1 to 8.2.0
+  com.unity.textmeshpro from version 2.0.1 to 3.0.1
