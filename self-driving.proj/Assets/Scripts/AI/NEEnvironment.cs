@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.IO;
 
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
@@ -46,6 +47,8 @@ public class NEEnvironment : Environment
     private float SumReward { get; set; }
     private float AvgReward { get; set; }
 
+    private float EliteAvg {get; set;}
+
     private List<NNBrain> Brains { get; set; } = new List<NNBrain>();
     private List<GameObject> GObjects { get; } = new List<GameObject>();
     private List<Agent> Agents { get; } = new List<Agent>();
@@ -55,6 +58,8 @@ public class NEEnvironment : Environment
 
     private List<AgentPair> AgentsSet { get; } = new List<AgentPair>();
     private Queue<NNBrain> CurrentBrains { get; set; }
+
+    private string filepath = @"Challenge4/d.csv";
 
     void Start() {
         for(int i = 0; i < TotalPopulation; i++) {
@@ -69,6 +74,8 @@ public class NEEnvironment : Environment
         }
         BestRecord = -9999;
         SetStartAgents();
+
+        File.WriteAllText(filepath, "Generation,BestRecord,GenBestRecord,Average,EliteAvg\n");
     }
 
     void SetStartAgents() {
@@ -151,6 +158,13 @@ public class NEEnvironment : Environment
 
         // Elite selection
         bestBrains.Sort(CompareBrains);
+
+        int avgmember = (int)(TotalPopulation * 0.7);
+        float tmpsum = 0;
+        for (int i = 0; i < avgmember; i++) tmpsum += bestBrains[i].Reward;
+        EliteAvg = tmpsum /avgmember;
+        
+
         if(EliteSelection > 0) {
             children.AddRange(bestBrains.Take(EliteSelection));
         }
@@ -163,10 +177,16 @@ public class NEEnvironment : Environment
         while(children.Count < TotalPopulation) {
             var tournamentMembers = Brains.AsEnumerable().OrderBy(x => Guid.NewGuid()).Take(tournamentSelection).ToList();
             tournamentMembers.Sort(CompareBrains);
-            children.Add(tournamentMembers[0].Mutate(Generation));
-            children.Add(tournamentMembers[1].Mutate(Generation));
+
+            for(int i = 0; i < 2 * (TotalPopulation/100); i++){
+                children.Add(tournamentMembers[i].Mutate(Generation));
+            }
+            
         }
         Brains = children;
+
+        File.AppendAllText(filepath, (Generation+1) +","+BestRecord + "," + GenBestRecord + "," + AvgReward + "," + EliteAvg + "\n");
+
         Generation++;
     }
 
